@@ -15,7 +15,7 @@ type rssRoot struct {
     Channel *Feed    `xml:"channel"`
 }
 
-type FeedParams struct {
+type Feed struct {
     Title       string   `xml:"title"`
     Link        string   `xml:"link"`
     Description string   `xml:"description"`
@@ -25,11 +25,7 @@ type FeedParams struct {
     Category    []string `xml:"category"`
     Generator   string   `xml:"generator,omitempty"`
     Ttl         int      `xml:"ttl,omitempty"`
-}
-
-type Feed struct {
-    FeedParams
-    Items []*Item `xml:"item"`
+    Items       []*Item  `xml:"item"`
 }
 
 type Image struct {
