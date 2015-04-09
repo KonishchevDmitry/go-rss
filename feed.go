@@ -92,9 +92,18 @@ func Generate(feed *Feed) ([]byte, error) {
 
     rssData := bytes.NewBufferString(xml.Header)
     rssData.Write(data)
-    rssData.WriteString("\n")
 
     return rssData.Bytes(), nil
+}
+
+
+func (feed *Feed) String() string {
+    xml, err := Generate(feed)
+    if err == nil {
+        return string(xml)
+    }
+
+    return fmt.Sprintf("XML generation error: %s. Go representation: %#v", err, feed)
 }
 
 

@@ -43,7 +43,7 @@ func main() {
         return
     }
 
-    fmt.Printf("%s", data)
+    fmt.Printf("%s\n", data)
 }
 ```
 
