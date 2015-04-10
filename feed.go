@@ -98,6 +98,10 @@ func Generate(feed *Feed) ([]byte, error) {
 
 
 func (feed *Feed) String() string {
+    if feed == nil {
+        return fmt.Sprintf("%#v", feed)
+    }
+
     xml, err := Generate(feed)
     if err == nil {
         return string(xml)
