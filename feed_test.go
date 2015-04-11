@@ -9,8 +9,7 @@ var minimalRss = `<?xml version="1.0" encoding="UTF-8"?>
         <link>http://example.com/</link>
         <description>Feed description</description>
     </channel>
-</rss>
-`
+</rss>`
 
 var fullRss = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
@@ -52,8 +51,7 @@ var fullRss = `<?xml version="1.0" encoding="UTF-8"?>
         </item>
         <item></item>
     </channel>
-</rss>
-`
+</rss>`
 
 func TestParseMinimal(t *testing.T) {
     testParse(t, minimalRss)
