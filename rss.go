@@ -6,6 +6,7 @@ import (
     "errors"
     "fmt"
     "io"
+    "mime"
     "net/http"
     "time"
 )
@@ -35,13 +36,8 @@ func GetWithParams(url string, params GetParams) (*Feed, error) {
     }
     defer response.Body.Close()
 
-    if response.StatusCode != http.StatusOK {
-        return nil, errors.New(response.Status)
-    }
-
-    content_type := response.Header.Get("Content-Type")
-    if content_type != ContentType {
-        return nil, errors.New("The feed has an invalid Content-Type.")
+    if err := checkResponse(response); err != nil {
+        return nil, err
     }
 
     return Read(response.Body)
@@ -87,4 +83,23 @@ func Generate(feed *Feed) ([]byte, error) {
     }
 
     return buffer.Bytes(), nil
+}
+
+func checkResponse(response *http.Response) error {
+    if response.StatusCode != http.StatusOK {
+        return errors.New(response.Status)
+    }
+
+    contentType := response.Header.Get("Content-Type")
+    mediaType, _, err := mime.ParseMediaType(contentType)
+    if err != nil {
+        return fmt.Errorf("The feed has an invalid Content-Type: %s", err)
+    }
+
+    allowedMediaTypes := map[string]bool {ContentType: true, "text/xml": true}
+    if !allowedMediaTypes[mediaType] {
+        return fmt.Errorf("The feed has an invalid Content-Type (%s).", mediaType)
+    }
+
+    return nil
 }
