@@ -1,9 +1,7 @@
 package rss
 
 import (
-    "bytes"
     "encoding/xml"
-    "errors"
     "fmt"
     "net/http"
     "time"
@@ -61,39 +59,6 @@ type Enclosure struct {
     Url    string `xml:"url,attr"`
     Type   string `xml:"type,attr"`
     Length int    `xml:"length,attr"`
-}
-
-
-func Parse(data []byte) (*Feed, error) {
-    rss := rssRoot{}
-
-    if err := xml.Unmarshal(data, &rss); err != nil {
-        return nil, err
-    }
-
-    if rss.Version != "2.0" {
-        return nil, errors.New(fmt.Sprintf("Invalid RSS version: %s.", rss.Version))
-    }
-
-    if rss.Channel == nil {
-        return nil, errors.New("The document doesn't conform to RSS specification.")
-    }
-
-    return rss.Channel, nil
-}
-
-func Generate(feed *Feed) ([]byte, error) {
-    rss := rssRoot{Version: "2.0", Channel: feed}
-
-    data, err := xml.MarshalIndent(&rss, "", "    ")
-    if err != nil {
-        return nil, err
-    }
-
-    rssData := bytes.NewBufferString(xml.Header)
-    rssData.Write(data)
-
-    return rssData.Bytes(), nil
 }
 
 

@@ -26,8 +26,16 @@ var rssData = `
 `
 
 func main() {
-    // Parse the RSS feed
-    feed, err := rss.Parse([]byte(rssData))
+    url := "http://example.com/feed.rss"
+
+    // Get an RSS feed from URL
+    feed, err := rss.Get(url)
+    if err != nil {
+        fmt.Printf("Failed to get %s: %s\n", url, err)
+    }
+
+    // Get an RSS feed from string
+    feed, err = rss.Parse([]byte(rssData))
     if err != nil {
         fmt.Println("Parsing error:", err)
         return
