@@ -96,7 +96,7 @@ func checkResponse(response *http.Response) error {
         return fmt.Errorf("The feed has an invalid Content-Type: %s", err)
     }
 
-    allowedMediaTypes := map[string]bool {ContentType: true, "text/xml": true}
+    allowedMediaTypes := map[string]bool {ContentType: true, "application/xml": true, "text/xml": true}
     if !allowedMediaTypes[mediaType] {
         return fmt.Errorf("The feed has an invalid Content-Type (%s).", mediaType)
     }

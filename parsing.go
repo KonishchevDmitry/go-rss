@@ -2,7 +2,8 @@ package rss
 
 import (
     "encoding/xml"
-    "net/http"
+    "time"
+    "fmt"
 )
 
 type rssRoot struct {
@@ -43,7 +44,7 @@ func (date *Date) MarshalXML(e *xml.Encoder, start xml.StartElement) (err error)
     }
 
     e.EncodeToken(start)
-    e.EncodeToken(xml.CharData(date.Format(http.TimeFormat)))
+    e.EncodeToken(xml.CharData(date.Format("Mon, 02 Jan 2006 15:04:05 GMT")))
     e.EncodeToken(xml.EndElement{start.Name})
 
     return
@@ -51,16 +52,22 @@ func (date *Date) MarshalXML(e *xml.Encoder, start xml.StartElement) (err error)
 
 func (date *Date) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
     var value string
-
     if err := d.DecodeElement(&value, &start); err != nil {
         return err
     }
 
-    time, err := http.ParseTime(value)
-    if err != nil {
-        return err
+    for _, year := range([]string{"2006", "06"}) {
+        for _, day := range([]string{"02", "2"}) {
+            for _, dayOfWeek := range([]string{"Mon, ", ""}) {
+                dateFormat := fmt.Sprintf("%s%s Jan %s 15:04:05 MST", dayOfWeek, day, year)
+                dateTime, err := time.Parse(dateFormat, value)
+                if err == nil {
+                    date.Time = dateTime
+                    return nil
+                }
+            }
+        }
     }
 
-    date.Time = time
-    return nil
+    return fmt.Errorf("Can't parse date: %s.", value)
 }
