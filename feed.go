@@ -53,6 +53,17 @@ type Enclosure struct {
     Length int    `xml:"length,attr"`
 }
 
+
+func (item *Item) HasCategory(category string) bool {
+    for _, itemCategory := range(item.Category) {
+        if itemCategory == category {
+            return true
+        }
+    }
+
+    return false
+}
+
 func (feed *Feed) String() string {
     if feed == nil {
         return fmt.Sprintf("%#v", feed)
