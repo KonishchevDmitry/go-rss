@@ -9,6 +9,9 @@ import (
     "mime"
     "net/http"
     "time"
+
+    "code.google.com/p/go-charset/charset"
+    _ "code.google.com/p/go-charset/data"
 )
 
 type GetParams struct {
@@ -45,12 +48,17 @@ func GetWithParams(url string, params GetParams) (*Feed, error) {
 
 func Read(reader io.Reader) (*Feed, error) {
     rss := rssRoot{}
-    if err := xml.NewDecoder(reader).Decode(&rss); err != nil {
+
+    decoder := xml.NewDecoder(reader)
+    decoder.CharsetReader = charset.NewReader
+    if err := decoder.Decode(&rss); err != nil {
         return nil, err
     }
 
-    if rss.Version != "2.0" {
-        return nil, fmt.Errorf("Invalid RSS version: %s.", rss.Version)
+    switch rss.Version {
+        case "2.0", "0.92", "0.91":
+        default:
+            return nil, fmt.Errorf("Invalid RSS version: %s.", rss.Version)
     }
 
     if rss.Channel == nil {
