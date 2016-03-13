@@ -53,6 +53,16 @@ var fullRss = `<?xml version="1.0" encoding="UTF-8"?>
             <guid>http://example.com/item3</guid>
         </item>
         <item></item>
+        <item>
+            <title>Охотники за привидениями - Русский Трейлер (2016)</title>
+            <link>http://www.youtube.com/watch?v=jhduECOtxPI</link>
+            <group xmlns="http://search.yahoo.com/mrss/">
+                <title>Охотники за привидениями - Русский Трейлер (2016)</title>
+                <thumbnail url="https://i3.ytimg.com/vi/jhduECOtxPI/hqdefault.jpg" width="480" height="360"></thumbnail>
+                <content url="https://www.youtube.com/v/jhduECOtxPI?version=3" type="application/x-shockwave-flash" width="640" height="390"></content>
+                <description>Официальный русский трейлер фильма Охотники за привидениями (2016)</description>
+            </group>
+        </item>
     </channel>
 </rss>`
 
