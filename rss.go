@@ -2,6 +2,7 @@ package rss
 
 import (
     "bytes"
+    "crypto/tls"
     "encoding/xml"
     "errors"
     "fmt"
@@ -16,22 +17,17 @@ import (
 
 type GetParams struct {
     Timeout time.Duration
-}
-
-var DefaultGetParams = GetParams{
-    Timeout: 30 * time.Second,
+    SkipCertificateCheck bool
 }
 
 const ContentType = "application/rss+xml"
 
 func Get(url string) (*Feed, error) {
-    return GetWithParams(url, DefaultGetParams)
+    return GetWithParams(url, GetParams{})
 }
 
 func GetWithParams(url string, params GetParams) (*Feed, error) {
-    client := &http.Client{
-        Timeout: params.Timeout,
-    }
+    client := ClientFromParams(params)
 
     response, err := client.Get(url)
     if err != nil {
@@ -44,6 +40,25 @@ func GetWithParams(url string, params GetParams) (*Feed, error) {
     }
 
     return Read(response.Body)
+}
+
+func ClientFromParams(params GetParams) (*http.Client) {
+    client := &http.Client{}
+
+    if params.Timeout == 0 {
+        client.Timeout = 30 * time.Second
+    } else {
+        client.Timeout = params.Timeout
+    }
+
+    if params.SkipCertificateCheck {
+        client.Transport = &http.Transport{
+            TLSClientConfig: &tls.Config{InsecureSkipVerify : true},
+        }
+
+    }
+
+    return client
 }
 
 func Read(reader io.Reader) (*Feed, error) {
