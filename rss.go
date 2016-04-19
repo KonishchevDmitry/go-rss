@@ -9,6 +9,7 @@ import (
     "io"
     "mime"
     "net/http"
+    "strings"
     "time"
 
     "code.google.com/p/go-charset/charset"
@@ -17,26 +18,43 @@ import (
 
 type GetParams struct {
     Timeout time.Duration
+    Cookies []*http.Cookie
     SkipCertificateCheck bool
 }
 
 const ContentType = "application/rss+xml"
+var allowedMediaTypes = []string{ContentType, "application/xml", "text/xml"}
+
 
 func Get(url string) (*Feed, error) {
     return GetWithParams(url, GetParams{})
 }
 
-func GetWithParams(url string, params GetParams) (*Feed, error) {
+func GetWithParams(url string, params GetParams) (feed *Feed, err error) {
     client := ClientFromParams(params)
 
-    response, err := client.Get(url)
+    request, err := http.NewRequest("GET", url, nil)
     if err != nil {
-        return nil, err
+        return
+    }
+
+    // Some servers don't return the feed without Accept header. For example one server (which requires cookie
+    // authentication) always returns login page if Accept header is not specified.
+    request.Header.Set("Accept", strings.Join(allowedMediaTypes, ", "))
+
+    for _, cookie := range params.Cookies {
+        request.AddCookie(cookie)
+    }
+
+    response, err := client.Do(request)
+    if err != nil {
+        return
     }
     defer response.Body.Close()
 
-    if err := checkResponse(response); err != nil {
-        return nil, err
+    err = checkResponse(response)
+    if err != nil {
+        return
     }
 
     return Read(response.Body)
@@ -119,10 +137,11 @@ func checkResponse(response *http.Response) error {
         return fmt.Errorf("The feed has an invalid Content-Type: %s", err)
     }
 
-    allowedMediaTypes := map[string]bool {ContentType: true, "application/xml": true, "text/xml": true}
-    if !allowedMediaTypes[mediaType] {
-        return fmt.Errorf("The feed has an invalid Content-Type (%s).", mediaType)
+    for _, allowedMediaType := range allowedMediaTypes {
+        if mediaType == allowedMediaType {
+            return nil
+        }
     }
 
-    return nil
+    return fmt.Errorf("The feed has an invalid Content-Type (%s).", mediaType)
 }
