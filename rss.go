@@ -19,12 +19,11 @@ import (
 type GetParams struct {
     Timeout time.Duration
     Cookies []*http.Cookie
+    SkipContentTypeCheck bool
     SkipCertificateCheck bool
 }
 
 const ContentType = "application/rss+xml"
-var allowedMediaTypes = []string{ContentType, "application/xml", "text/xml"}
-
 
 func Get(url string) (*Feed, error) {
     return GetWithParams(url, GetParams{})
@@ -32,6 +31,7 @@ func Get(url string) (*Feed, error) {
 
 func GetWithParams(url string, params GetParams) (feed *Feed, err error) {
     client := ClientFromParams(params)
+    allowedMediaTypes := []string{"application/rss+xml", "application/xml", "text/xml"}
 
     request, err := http.NewRequest("GET", url, nil)
     if err != nil {
@@ -52,9 +52,15 @@ func GetWithParams(url string, params GetParams) (feed *Feed, err error) {
     }
     defer response.Body.Close()
 
-    err = checkResponse(response)
-    if err != nil {
-        return
+    if response.StatusCode != http.StatusOK {
+        return nil, errors.New(response.Status)
+    }
+
+    if !params.SkipContentTypeCheck {
+        err = checkContentType(response, allowedMediaTypes)
+        if err != nil {
+            return
+        }
     }
 
     return Read(response.Body)
@@ -126,11 +132,7 @@ func Generate(feed *Feed) ([]byte, error) {
     return buffer.Bytes(), nil
 }
 
-func checkResponse(response *http.Response) error {
-    if response.StatusCode != http.StatusOK {
-        return errors.New(response.Status)
-    }
-
+func checkContentType(response *http.Response, allowedMediaTypes []string) error {
     contentType := response.Header.Get("Content-Type")
     mediaType, _, err := mime.ParseMediaType(contentType)
     if err != nil {
