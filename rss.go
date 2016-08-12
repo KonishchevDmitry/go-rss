@@ -12,8 +12,7 @@ import (
     "strings"
     "time"
 
-    "code.google.com/p/go-charset/charset"
-    _ "code.google.com/p/go-charset/data"
+    "golang.org/x/net/html/charset"
 )
 
 type GetParams struct {
@@ -89,7 +88,7 @@ func Read(reader io.Reader) (*Feed, error) {
     rss := rssRoot{}
 
     decoder := xml.NewDecoder(reader)
-    decoder.CharsetReader = charset.NewReader
+    decoder.CharsetReader = charset.NewReaderLabel
     if err := decoder.Decode(&rss); err != nil {
         return nil, err
     }
