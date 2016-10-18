@@ -1,8 +1,8 @@
 package rss
 
 import (
-    "os"
-    "testing"
+	"os"
+	"testing"
 )
 
 var minimalRss = `<?xml version="1.0" encoding="UTF-8"?>
@@ -67,43 +67,43 @@ var fullRss = `<?xml version="1.0" encoding="UTF-8"?>
 </rss>`
 
 func TestParseMinimal(t *testing.T) {
-    testParse(t, minimalRss)
+	testParse(t, minimalRss)
 }
 
 func TestParseFull(t *testing.T) {
-    testParse(t, fullRss)
+	testParse(t, fullRss)
 }
 
 func TestReadRss091WithCustomEncoding(t *testing.T) {
-    file, err := os.Open("testdata/rss-0.91-with-custom-encoding.xml")
-    if err != nil {
-        t.Fatal(err)
-    }
-    defer file.Close()
+	file, err := os.Open("testdata/rss-0.91-with-custom-encoding.xml")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer file.Close()
 
-    feed, err := Read(file)
-    if err != nil {
-        t.Fatal(err)
-    }
+	feed, err := Read(file)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    if feed.Description != "Свежачок от LostFilm.TV" ||
-       feed.Items[0].Title != "Непокорная Земля (Defiance). Мир, который мы захватим/Последние единороги (The World We Seize/The Last Unicorns) [MP4]. (S03E01-2)" {
-        t.Fatalf("Got an invalid feed: %s", feed)
-    }
+	if feed.Description != "Свежачок от LostFilm.TV" ||
+		feed.Items[0].Title != "Непокорная Земля (Defiance). Мир, который мы захватим/Последние единороги (The World We Seize/The Last Unicorns) [MP4]. (S03E01-2)" {
+		t.Fatalf("Got an invalid feed: %s", feed)
+	}
 }
 
 func testParse(t *testing.T, data string) {
-    feed, err := Parse([]byte(data))
-    if err != nil {
-        t.Fatal(err)
-    }
+	feed, err := Parse([]byte(data))
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    generatedData, err := Generate(feed)
-    if err != nil {
-        t.Fatal(err)
-    }
+	generatedData, err := Generate(feed)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-    if string(generatedData) != data {
-        t.Fatalf("Feeds don't match:\n%s\nvs\n%s", generatedData, data)
-    }
+	if string(generatedData) != data {
+		t.Fatalf("Feeds don't match:\n%s\nvs\n%s", generatedData, data)
+	}
 }
