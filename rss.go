@@ -52,7 +52,10 @@ func GetWithParams(url string, params GetParams) (feed *Feed, err error) {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return nil, errors.New(response.Status)
+		return nil, &InvalidStatusCodeError{
+			StatusCode: response.StatusCode,
+			Status:     response.Status,
+		}
 	}
 
 	if !params.SkipContentTypeCheck {
@@ -100,7 +103,7 @@ func Read(reader io.Reader) (*Feed, error) {
 	}
 
 	if rss.Channel == nil {
-		return nil, fmt.Errorf("The document doesn't conform to RSS specification.")
+		return nil, errors.New("The document doesn't conform to RSS specification.")
 	}
 
 	return rss.Channel, nil
